@@ -1,15 +1,37 @@
-type ConditionFn = (...args: any[]) => boolean;
-type ResultFn = (...args: any[]) => any;
-type Clause = [ConditionFn, ResultFn];
+export const cond = (
+  clauses: [(...args: any[]) => boolean, (...args: any[]) => any]
+) => {
+  return (...args: any[]) => {
+    clauses.forEach(clause => {
+      if (Array.isArray(clause)) {
+        const [conditionFn, resultFn] = clause;
 
-export function cond(clauses: Clause[]): (...args: any[]) => any {
-  return (...args) => {
-    for (let i = 0, l = clauses.length; i < l; i++) {
-      if (Array.isArray(clauses[i])) {
-        if (clauses[i][0].apply(null, args)) {
-          return clauses[i][1].apply(null, args);
+        if (conditionFn.apply(null, args)) {
+          return resultFn.apply(null, args);
         }
       }
-    }
+    });
   };
-}
+};
+
+// new hotness
+// type CondClause = [(value: any) => boolean, (value: any) => any];
+
+// const cond = (clauses: CondClause[]) => {
+//   return (value: any) => {
+//     let result;
+
+//     for (const clause of clauses) {
+//       if (Array.isArray(clause)) {
+//         const [conditionFn, resultFn] = clause;
+
+//         if (conditionFn(value)) {
+//           result = resultFn(value);
+//           break;
+//         }
+//       }
+//     }
+
+//     return result;
+//   };
+// };
